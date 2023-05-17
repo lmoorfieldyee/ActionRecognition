@@ -4,7 +4,6 @@ import numpy as np
 
 
 class Pipe():
-
     """
     Setting up mediapipe class. Mediapipe holistic is used to process images and extract
     keypoint landmarks which are used in training and inference of neural network.
@@ -125,21 +124,21 @@ class Pipe():
         # Loop through every pose landmark and extract and append its x, y, z, and visibility values. The 4 values
         # are stored in a list, before appending to main list creating a 33x4 array. Array is then flattened to
         # a one dimensional np array. If there is no one in the frame then we pass through an empty array of zeros.
-        pose_landmarks = (np.array([[res.x, res.y, res.z] for res in results.pose_landmarks.landmark])
-                          if results.pose_landmarks else np.zeros(132))
+        pose_landmarks = (np.array([[res.x, res.y, res.z] for res in results.pose_landmarks.landmark]).flatten()
+                          if results.pose_landmarks else np.zeros(99))
 
         # extract face landmarks -> There are 468 face landmarks with x, y, z values (1404 inputs)
         # same methodology as pose landmarks
-        face_landmarks = (np.array([[res.x, res.y, res.z] for res in results.face_landmarks.landmark])
+        face_landmarks = (np.array([[res.x, res.y, res.z] for res in results.face_landmarks.landmark]).flatten()
                           if results.face_landmarks else np.zeros(1404))
 
         # extract left hand landmarks -> There are 21 landmarks with x, y, & z values (63 inputs)
-        left_hand_landmarks = (np.array([[res.x, res.y, res.z] for res in results.left_hand_landmarks.landmark])
+        left_hand_landmarks = (np.array([[res.x, res.y, res.z] for res in results.left_hand_landmarks.landmark]).flatten()
                                if results.left_hand_landmarks else np.zeros(63))
 
         # extract right hand landmarks -> There are 21 landmarks with x, y, & z values (63 inputs)
-        right_hand_landmarks = (np.array([[res.x, res.y, res.z] for res in results.right_hand_landmarks.landmark])
+        right_hand_landmarks = (np.array([[res.x, res.y, res.z] for res in results.right_hand_landmarks.landmark]).flatten()
                                 if results.right_hand_landmarks else np.zeros(63))
 
 
-        return np.concatenate(pose_landmarks, face_landmarks, left_hand_landmarks, right_hand_landmarks)
+        return pose_landmarks.flatten(), face_landmarks.flatten(), left_hand_landmarks.flatten(), right_hand_landmarks
