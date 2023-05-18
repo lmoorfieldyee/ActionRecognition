@@ -1,0 +1,17 @@
+[33mcommit e3e1d66d76edbd292b3417c62336442ba15f9dab[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m)[m
+Author: Liam Moorfield-Yee <lmoorfieldyee@gmail.com>
+Date:   Thu May 18 09:29:03 2023 -0400
+
+    Working on EDA notebook. Fixed graph scales so they are all on the same scale and created new graph which plots the key hand and face landmarks for a particular frame as a sanity check.
+
+[33mcommit b13f41d3c2f3e983d7888ddfc7a9f47b32068a60[m[33m ([m[1;31morigin/master[m[33m)[m
+Author: Liam Moorfield-Yee <lmoorfieldyee@gmail.com>
+Date:   Wed May 17 14:05:19 2023 -0400
+
+    erasing old commits and updating with new commit. Changes made: 1) Working on the Action Recognition EDA. We have ensured that there are the same number of observations for each class, and have explored some key landmark location trends. Particularly, the wrist landmarks positions were analysed over the course of the different action movements to see if there were any trends we can pick up on. In addition, we looked at how the face moved throughout the movements as well. We are currently analyzing the elbow movement. 2) We motified the extraction function in the keypoints module (extract_landmarks2 fct'n) to return the body landmarks in separate groups for a data sanity check. 3) We processed the raw data using the new extraction function, and saved the body part landmarks in their own csv files. This was done in the Data Sanity Check file. We crossed referenced the x,y values from our sanity data extraction landmarks with the values we are using in our analysis. They match up - phew! I'm confident to continue on with the analysis now
+
+[33mcommit c192c3ba8729c4a350d63d91c7b30e123adae1f2[m
+Author: Liam Moorfield-Yee <lmoorfieldyee@gmail.com>
+Date:   Mon May 15 15:52:51 2023 -0400
+
+    first commit. Already completed raw data collection, processing raw data using mediapipe holistic. I am currently in the process of working on exploratory data analysis (done in jupyter notebook). Data collection and processing was done in PyCharm in a modular format. I will go back and clean up every single file and add detailed notes.
