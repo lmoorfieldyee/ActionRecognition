@@ -1,3 +1,7 @@
+"""
+general purpose functions go in utils.py file
+"""
+
 import numpy as np
 import os
 

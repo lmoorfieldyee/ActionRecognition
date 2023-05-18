@@ -26,7 +26,7 @@ for action in actions:
             ret, frame = cap.read()
 
             # If start of new sequence, then wait for 1 second
-            if frame_num == model.frames_per_seq-1:
+            if frame_num == model.frames_per_seq - 1:
                 cv2.putText(frame, "STARTING COLLECTION", (120, 200),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (150, 255, 100), 3, cv2.LINE_AA)
                 cv2.putText(frame, f'Collecting frames for {action} Video Number {vid_number}', (15,12),

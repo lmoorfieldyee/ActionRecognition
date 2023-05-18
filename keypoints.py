@@ -9,7 +9,7 @@ class Pipe():
     keypoint landmarks which are used in training and inference of neural network.
     """
 
-    def __init__(self, frames_per_seq = 40, num_sample_videos = 30):
+    def __init__(self, frames_per_seq=40, num_sample_videos=30):
 
         # Instantiate mp holistic
         self.mp_holistic = mp.solutions.holistic
@@ -108,7 +108,8 @@ class Pipe():
 
     def extract_landmarks2(self, results):
         """
-        Extract key landmarks but maintain original shape (i.e. not flattened)
+        Extract key landmarks but return body part groupings separately. This is a sanity check to ensure correct
+        subsetting is happening during EDA and feature engineering.
 
         extract_landmarks takes in the results from processing an image with mediapipe.mp_holistic.Holistic.process(),
         and extracts the landmark values for pose, face, left & right hand. If no landmarks exist, which will happen
