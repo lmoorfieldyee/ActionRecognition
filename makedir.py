@@ -5,33 +5,51 @@ general purpose functions go in utils.py file
 import numpy as np
 import os
 
-# Path for exported data, numpy arrays
-path = './Raw_Data'
-person = 'William_desk' + '_Data'
-if os.path.isdir(path)==False:
-    os.makedirs(path)
+def makedir(subject, description, action):
+    """
+    Takes in subject name, action being performed, and descriptive title of how or where the action is being performed.
+    Creates the directory structure to save the video frames. Does not return anything.
 
-DATA_PATH = os.path.join(path, person)
+    :param subject: Name of the subject performing the action
+    :param description: Description of how or where the subject is performing the action (i.e. sitting, standing,
+    kithen, work, outside etc.).
+    :param action: The action to be performed (wave, kiss, finger, salute, idle, heart)
+    :return: Returns nothing. Creates directories to store video samples and their respective frames.
+    """
 
-# Actions we want to detect
-actions = np.array(['wave', 'kiss', 'finger', 'salute', 'heart', 'idle'])
-#actions = ['idle']
-for action in actions:
-    if os.path.isdir(os.path.join(DATA_PATH, action)) == False:
-        os.makedirs(os.path.join(DATA_PATH, action))
+    ROOT_PATH = './Raw_Data'
+    # Assert that raw data file exists. If not tell the person to create manually
+    # I'm not risking over-riding my data
+    assert os.path.isdir(ROOT_PATH), "Ensure that Raw_Data folder is created in working directory"
 
-# Thirty videos worth of data per class
-no_sequences = 30
+    # Create subject folder path
+    subject_data_path = os.path.join(ROOT_PATH, subject + "_" + description)
+    # Create action folder path
+    action_video_path = os.path.join(subject_data_path, action)
 
-# Folder start
-start_folder = 30
 
-for action in actions:
-    if os.path.isdir(os.path.join(DATA_PATH, action)):
-        dirmax = len(os.listdir(os.path.join(DATA_PATH, action)))
-        for sequence in range(0,no_sequences):
-            print(action, dirmax+sequence)
-            try:
-                os.makedirs(os.path.join(DATA_PATH, action, str(dirmax+sequence)))
-            except:
-                pass
+    # check to see if above directories exist, if not then create them
+    if not os.path.isdir(subject_data_path):
+        os.makedirs(subject_data_path)
+    if not os.path.isdir(action_video_path):
+        os.makedirs(action_video_path)
+
+    # set the number of video samples to collect (default is 30 for this project)
+    num_vid_samples = np.arange(0, 30)
+
+    # create 30 empty directories
+    for vid_num in num_vid_samples:
+        # create empty path for video folder
+        vid_sample_path = os.path.join(action_video_path, str(vid_num))
+
+        try:
+            # create empty video folder
+            os.makedirs(vid_sample_path)
+        except:
+            pass
+
+if __name__ == "__main__":
+    get_subject_name = input('enter subject name. >  ')
+    get_location = input("Are you standing or sitting? > ")
+    get_action = input('enter action to be recorded. > ')
+    makedir(get_subject_name, get_location, get_action)
