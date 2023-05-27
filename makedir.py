@@ -5,7 +5,7 @@ general purpose functions go in utils.py file
 import numpy as np
 import os
 
-def makedir(subject, description, action):
+def makedir(subject, description, action, number_of_video_samples):
     """
     Takes in subject name, action being performed, and descriptive title of how or where the action is being performed.
     Creates the directory structure to save the video frames. Does not return anything.
@@ -14,6 +14,7 @@ def makedir(subject, description, action):
     :param description: Description of how or where the subject is performing the action (i.e. sitting, standing,
     kithen, work, outside etc.).
     :param action: The action to be performed (wave, kiss, finger, salute, idle, heart)
+    :param number_of_video_samples: How many empty video sample folders to create (default = 30)
     :return: Returns nothing. Creates directories to store video samples and their respective frames.
     """
 
@@ -23,7 +24,7 @@ def makedir(subject, description, action):
     assert os.path.isdir(ROOT_PATH), "Ensure that Raw_Data folder is created in working directory"
 
     # Create subject folder path
-    subject_data_path = os.path.join(ROOT_PATH, subject + "_" + description)
+    subject_data_path = os.path.join(ROOT_PATH, subject + "_" + description + "_Data")
     # Create action folder path
     action_video_path = os.path.join(subject_data_path, action)
 
@@ -35,7 +36,7 @@ def makedir(subject, description, action):
         os.makedirs(action_video_path)
 
     # set the number of video samples to collect (default is 30 for this project)
-    num_vid_samples = np.arange(0, 30)
+    num_vid_samples = np.arange(0, number_of_video_samples)
 
     # create 30 empty directories
     for vid_num in num_vid_samples:

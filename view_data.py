@@ -3,14 +3,14 @@ import cv2
 from keypoints import Pipe
 import os
 
-path = './Raw_Data'
-person = 'Dev_sitting' + '_Data'
+path = './Raw_Data_Testing_Folder'
+person = 'Kieran_sitting'
 data_folder = os.path.join(path, person)
 
-actions = ['heart']
+actions = ['wave']
 model = Pipe()
 
-path = "./Raw_Data/Dev_sitting_Data/wave"
+path = "./Raw_Data_Testing_Folder/Kieran_sitting/wave"
 #with model.mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
 for video_num in range(30):
     for frame_num in range(40):
