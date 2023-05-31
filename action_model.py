@@ -44,12 +44,12 @@ y = to_categorical(labels).astype(int)
 print(X.shape)
 print(y.shape)
 
-'''
+
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.10, random_state=50)
 
 print(X_train.shape)
 print(y_train.shape)
-
+'''
 log_dir = os.path.join('Logs')
 tb_callback = TensorBoard(log_dir=log_dir)
 

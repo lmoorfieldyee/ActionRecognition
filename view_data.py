@@ -10,7 +10,7 @@ data_folder = os.path.join(path, person)
 actions = ['wave']
 model = Pipe()
 
-path = "./Raw_Data_Testing_Folder/Kieran_sitting/wave"
+path = "./Raw_Data/Pierce_sitting_dining_room_Data/wave"
 #with model.mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
 for video_num in range(30):
     for frame_num in range(40):

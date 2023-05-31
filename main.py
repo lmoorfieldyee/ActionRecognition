@@ -26,7 +26,9 @@ time_delta = timedelta(seconds=0)
 threshold = 0.65
 # get class names
 actions = os.listdir('./Processed_Data')
-print(actions)
+
+
+
 
 with model.mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
     while cap.isOpened():
