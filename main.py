@@ -5,6 +5,7 @@ from keypoints import Pipe
 import os
 from datetime import datetime
 from datetime import timedelta
+import socket
 
 # instantiate mediapipe
 model = Pipe()
@@ -27,14 +28,16 @@ threshold = 0.65
 # get class names
 actions = os.listdir('./Processed_Data')
 
-
-
+# We need this program to talk with Unity
+# Setting up socket to send data to
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+# Video tutorial used the ip "127.01.01.1" and 5052 port, but this does not exist on my system
+serverAddressPort = ('127.0.0.1', 6942)
 
 with model.mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
     while cap.isOpened():
         # read in next frame
         _, frame = cap.read()
-
         width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
         height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
@@ -47,6 +50,10 @@ with model.mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confi
 
         # extract landmark values
         lh = model.extract_landmarks(results)
+
+        # initialize action being performed - default is no action
+        action_being_performed = 'None'
+
 
         # append current frame's landmarks to video frame list
         video_frames.append(lh)
@@ -72,7 +79,6 @@ with model.mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confi
                 else:
                     # Next action cannot be same as previous action
                     if actions[np.argmax(res)] != detected_actions[-1]:
-
                     #print(action_time[-1])
                     #print((action_time[-1] + time_delta))
                     # Must wait x (time_delta) seconds before next action
@@ -84,6 +90,18 @@ with model.mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confi
                         video_frames = []
                         cv2.putText(frame, f"{actions[np.argmax(res)]}", (120, 200),
                                     cv2.FONT_HERSHEY_SIMPLEX, 1, (150, 255, 100), 3, cv2.LINE_AA)
+
+                        action_being_performed = actions[np.argmax(res)]
+
+        # extract the nose landmark x & y values to update avatar head location
+        x_nose_landmark = str(lh[0])
+        y_nose_landmark = str(lh[1])
+
+        # data to be sent to unity
+        unity_data = (x_nose_landmark + "," + y_nose_landmark + "," + action_being_performed)
+
+        # send nose location data and action data to unity
+        sock.sendto(str.encode(unity_data), serverAddressPort)
 
         # show to frame
         cv2.imshow('Frame', frame)
