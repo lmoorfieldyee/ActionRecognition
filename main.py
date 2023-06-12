@@ -7,10 +7,27 @@ from datetime import datetime
 from datetime import timedelta
 import socket
 
+"""
+NOTE: CHECK WHICH MODEL YOU ARE USING AS EACH MODEL HAS DIFFERENT FEATURES. THIS MEANS THAT YOU WILL NOT ONLY
+NEED TO CHANGE THE MODEL BUT ALSO THE extract_landmark() FUNCTION TO PASS THROUGH CORRECT DATA. DEFAULT
+MODEL IS clf_model3-837-0.09.hdf5. YOU ALSO NEED TO UPDATE THE NOSE LANDMARK DATA BEING PASSED TO UNITY AS IT IS IN 
+A DIFFERENT SPOT FOR EACH DATASET.
+
+BELOW IS A BREAKDOWN OF MODEL/EXTRACT_LANDMARK FCT'N PAIRS
+1. actions.h5 -> extract_landmarks() fct'n
+2. clf_model3-837-0.09.hdf5 (found in model3_loss folder) -> extract_landmarks3() fct'n
+3. clf_model2-190-0.97.hdf5 (found in model2 folder) -> extract_landmarks4() fct'n
+
+BELOW IS A BREAKDOWN OF MODEL/NOSE LANDMARK X,Y PAIRS
+1. actions.h5 -> col index 0 (x); col index 1 (y)
+2. clf_model2-190-0.97.hdf5 (found in model2 folder) -> col index 126 (x); col index 127 (y)
+"""
+
 # instantiate mediapipe
 model = Pipe()
+
 # load up action recognition neural network
-clf_model = keras.models.load_model('./actions.h5')
+clf_model = keras.models.load_model('clf_model2-190-0.97.hdf5')
 # connect webcam
 cap = cv2.VideoCapture(0)
 
@@ -49,7 +66,7 @@ with model.mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confi
         model.draw_landmarks(frame, results)
 
         # extract landmark values
-        lh = model.extract_landmarks(results)
+        lh = model.extract_landmarks4(results)
 
         # initialize action being performed - default is no action
         action_being_performed = 'None'
@@ -94,8 +111,8 @@ with model.mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confi
                         action_being_performed = actions[np.argmax(res)]
 
         # extract the nose landmark x & y values to update avatar head location
-        x_nose_landmark = str(lh[0])
-        y_nose_landmark = str(lh[1])
+        x_nose_landmark = str(lh[126])
+        y_nose_landmark = str(lh[127])
 
         # data to be sent to unity
         unity_data = (x_nose_landmark + "," + y_nose_landmark + "," + action_being_performed)

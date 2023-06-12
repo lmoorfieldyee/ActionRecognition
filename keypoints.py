@@ -1,6 +1,7 @@
 import mediapipe as mp
 import cv2
 import numpy as np
+import math
 
 
 class Pipe():
@@ -91,20 +92,6 @@ class Pipe():
 
         return np.concatenate([pose_landmarks, face_landmarks, left_hand_landmarks, right_hand_landmarks])
 
-    # reshape face & hand landmarks so face will be a 468 (row) x 3 (col) array, and hand
-    # array will be back in its original 21 (row) x 3 (col) array.
-    # From here we need to calculate the distance between select right hand landmarks, select right hand landmarks and
-    # left hand landmarks, and select right hand landmarks and face landmarks.
-    # New inter-right hand distances calculated: 21**21=441
-    # New right-left hand distances calculated: 21*21 = 441
-    # New right hand face distances calculated:
-
-    def three_d_distance(self, pointa, pointb):
-        ax, ay, az = pointa
-        bx, by, bz = pointb
-        distance = ((bx-ax)**2 + (by-ay)**2 + (bz-az)**2)**(1/2)
-        return distance
-
 
     def extract_landmarks2(self, results):
         """
@@ -143,3 +130,155 @@ class Pipe():
 
 
         return pose_landmarks.flatten(), face_landmarks.flatten(), left_hand_landmarks.flatten(), right_hand_landmarks
+
+
+    def extract_landmarks3(self, results):
+        """
+        extract_landmarks3() is to be used in conjuction with LSTM's trained on model3 data (only distance features).
+
+        extract_landmarks3 takes in the Google's holistic model results and extracts the landmarks for both hands
+        and the general pose groupings. It then calculates 21 distance metrics, all originating from the left and right
+        wrists to various other points on the body (primarily to other points on each hand).
+        """
+        # set wrist x & y column index values (always the 1st & 2nd column)
+        wrist_lm_xy = (0, 1)
+
+        # list of all hand landmarks to get x & y cols of -> hand_landmarks = [4, 8, 12, 16, 20]
+        # get the x, y col indexes for each landmark and store in lists. each landmark has an x,y & z val
+        # hence multiply by 3 to get the beginning of given landmark
+        hand_x_values = [4*3, 8*3, 12*3, 16*3, 20*3]
+        hand_y_values = [4*3+1, 8*3+1, 12*3+1, 16*3+1, 20*3+1]
+
+        # pose landmarks list which we need to calc distances to -> pose_landmarks = [0, 11, 12, 13, 14]
+        pose_x_values = [0, 11*4, 12*4, 13*4, 14*4]
+        pose_y_values = [1, 11*4+1, 12*4+1, 13*4+1, 14*4+1]
+
+        # instantiate left hand distances list
+        lh_inter_distances = []
+        lh_pose_distances = []
+
+        # instantiate inter-right hand distances list
+        rh_inter_distances = []
+        rh_pose_distances = []
+
+        # Extract landmarks
+        # Extract pose landmarks -> 33 pose landmarks with an x, y, z & visibility value (132 inputs).
+        # Loop through every pose landmark and extract and append its x, y, z, and visibility values. The 4 values
+        # are stored in a list, before appending to main list creating a 33x4 array. Array is then flattened to
+        # a one dimensional np array. If there is no one in the frame then we pass through an empty array of zeros.
+        pose_landmarks = (np.array([[res.x, res.y, res.z] for res in results.pose_landmarks.landmark]).flatten()
+                          if results.pose_landmarks else np.zeros(99))
+
+        # extract left hand landmarks -> There are 21 landmarks with x, y, & z values (63 inputs)
+        left_hand_landmarks = (np.array([[res.x, res.y, res.z] for res in results.left_hand_landmarks.landmark]).flatten()
+                               if results.left_hand_landmarks else np.zeros(63))
+
+        # extract right hand landmarks -> There are 21 landmarks with x, y, & z values (63 inputs)
+        right_hand_landmarks = (np.array([[res.x, res.y, res.z] for res in results.right_hand_landmarks.landmark]).flatten()
+                                if results.right_hand_landmarks else np.zeros(63))
+
+        # need to subset out only the hand landmarks of focus (each landmark has an x & y value)
+        left_hand_x_vals = left_hand_landmarks[hand_x_values]
+        left_hand_y_vals = left_hand_landmarks[hand_y_values]
+        right_hand_x_vals = right_hand_landmarks[hand_x_values]
+        right_hand_y_vals = right_hand_landmarks[hand_y_values]
+
+        # subset out x & y wrist landmark values
+        right_hand_wrist = right_hand_landmarks[[0,1]]
+        left_hand_wrist = left_hand_landmarks[[0,1]]
+
+        # subset out x & y columns for desired pose landmarks
+        pose_landmarks_x = pose_landmarks[pose_x_values]
+        pose_landmarks_y = pose_landmarks[pose_y_values]
+
+        # Calculate the below body distances:
+        # Distances from each wrist to finger tips
+        # Distance between the left hand wrist & right hand wrist
+        # Then distances from left & right hand wrists to each body pose landmarks
+
+        # Calculate left hand wrist to finger tip distances
+        for i in range(len(left_hand_x_vals)):
+            # calculate lh distances
+            lh_new_dist = ((left_hand_wrist[0] - left_hand_x_vals[i])**2 +
+                        (left_hand_wrist[1] - left_hand_y_vals[i])**2).astype(float)
+
+            # Check to make sure that there is a positive distance between two points, so we can take the square root
+            # to get the distance. Possible for above calculation to produce a value of 0 if both hands are out of
+            # frame. This will throw error as you can't take sqrt of 0.
+            if lh_new_dist > 0:
+                lh_new_dist = math.sqrt(lh_new_dist)
+
+            # append to appropriate distance list
+            lh_inter_distances.append(lh_new_dist)
+
+            # calculate rh distances - repeat above code (I know it's not pythonic)
+            rh_new_dist = ((right_hand_wrist[0] - right_hand_x_vals[i]) ** 2 +
+                           (right_hand_wrist[1] - right_hand_y_vals[i]) ** 2).astype(float)
+            # Check to make sure that there is a positive distance between two points so we can take the square root
+            # to get the distance
+            if rh_new_dist > 0:
+                rh_new_dist = math.sqrt(rh_new_dist)
+            rh_inter_distances.append(rh_new_dist)
+
+        # Calculate wrist to wrist distance
+        wrist_to_wrist = (left_hand_wrist[0] - right_hand_wrist[0])**2 + (left_hand_wrist[1] - right_hand_wrist[1])**2
+
+        # Make sure that above number is positive before taking the sqrt to calc final dist as it's possible to have
+        # a distance of 0 which will throw error
+        if wrist_to_wrist > 0:
+            wrist_to_wrist = math.sqrt(wrist_to_wrist)
+
+        # in order to concatenate with other distance lists, everything must be in same shape. Therefore need to
+        # make wrist_to_wrist a list of shape (1,)
+        wrist_to_wrist = [wrist_to_wrist]
+
+        # Calculate left wrist to pose landmarks
+        for i in range(len(pose_landmarks_x)):
+            lh_pose_dist = ((left_hand_wrist[0] - pose_landmarks_x[i])**2 +
+                            (left_hand_wrist[1] - pose_landmarks_y[i])**2)
+            if lh_pose_dist > 0:
+                lh_pose_dist = math.sqrt(lh_pose_dist)
+            lh_pose_distances.append(lh_pose_dist)
+
+            rh_pose_dist = ((right_hand_wrist[0] - pose_landmarks_x[i]) ** 2 +
+                            (right_hand_wrist[1] - pose_landmarks_y[i]) ** 2)
+            if rh_pose_dist > 0:
+                rh_pose_dist = math.sqrt(rh_pose_dist)
+            rh_pose_distances.append(rh_pose_dist)
+
+        return np.concatenate([lh_inter_distances, wrist_to_wrist, lh_pose_distances,
+                               rh_inter_distances, rh_pose_distances])
+
+    def extract_landmarks4(self, results):
+        """
+        Extract_landmarks4() is to be used in conjuction with LSTM's trained on model2 data.
+
+        Extract_landmarks4 takes in the results from processing an image with mediapipe.mp_holistic.Holistic.process(),
+        and extracts the landmark values for pose, left & right hand only (no face mesh landmarks).
+        If no landmarks exist within the grouping, which will happen if the given body part is out of frame,
+        then an empty array of zeros, with the same shape, will be created in its place.
+
+        :param results: detection results returned from mediapipe.mp_holistic.Holistic.process()
+        :return: One 1D numpy array which is the concatenation of four flattened 1D numpy arrays,
+        which include the values (x, y, & z co-ordinates) of every pose, face, and hand landmark. Pose landmarks
+        include an additional visibility parameter. Final array has a shape of (1662, )
+        """
+        # Extract landmarks
+        # Extract pose landmarks -> 33 pose landmarks with an x, y, z & visibility value (132 inputs).
+        # Loop through every pose landmark and extract and append its x, y, z, and visibility values. The 4 values
+        # are stored in a list, before appending to main list creating a 33x4 array. Array is then flattened to
+        # a one dimensional np array. If there is no one in the frame then we pass through an empty array of zeros.
+        pose_landmarks = (np.array([[res.x, res.y, res.z, res.visibility] for res in results.pose_landmarks.landmark]).
+                          flatten() if results.pose_landmarks else np.zeros(132))
+
+
+        # extract left hand landmarks -> There are 21 landmarks with x, y, & z values (63 inputs)
+        left_hand_landmarks = (np.array([[res.x, res.y, res.z] for res in results.left_hand_landmarks.landmark]).
+                               flatten() if results.left_hand_landmarks else np.zeros(63))
+
+        # extract right hand landmarks -> There are 21 landmarks with x, y, & z values (63 inputs)
+        right_hand_landmarks = (np.array([[res.x, res.y, res.z] for res in results.right_hand_landmarks.landmark]).
+                                flatten() if results.right_hand_landmarks else np.zeros(63))
+
+        # model dataset was concatenated with lh first, rh second, and pose landmarks last
+        return np.concatenate([left_hand_landmarks, right_hand_landmarks, pose_landmarks])
