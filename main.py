@@ -91,8 +91,11 @@ def send_unity_data(landmark_list, action_being_performed, data_port, model_numb
 
 def percent_action_complete(video_len, frames_per_action, frame_to_write):
     percent_complete = video_len / frames_per_action
-    cv2.putText(frame_to_write, f"{percent_complete}", (120, 200),
-                cv2.FONT_HERSHEY_SIMPLEX, 1, (150, 255, 100), 3, cv2.LINE_AA)
+    x_dist = 120 + int((520-120)*percent_complete)
+    cv2.rectangle(frame_to_write, (120, 400), (x_dist, 430), color=(155,100,50), thickness=-1)
+    cv2.putText(frame_to_write, f"Action Complete Percent: {percent_complete}", (200, 420),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
+
 
 def reset_video_list(video_frame_list, append_time_list, time_delay):
     # We need to add a time delta as it's quite common for the model to lose track of the hand for a second
@@ -108,6 +111,8 @@ def reset_video_list(video_frame_list, append_time_list, time_delay):
             return video_frame_list, append_time_list
         else:
             return video_frame_list, append_time_list
+
+
 
 # instantiate mediapipe
 model = Pipe()
@@ -159,13 +164,19 @@ with model.mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confi
         frame, results = model.pose_detection(frame, model=holistic)
 
         # draw landmarks
-        model.draw_landmarks(frame, results)
+        model.draw_landmarks2(frame, results)
 
         # extract landmark values
         lh = model.extract_landmarks4(results)
 
         # initialize action being performed - default is no action
         action_being_performed = 'None'
+
+        # draw action percent complete bar
+        cv2.rectangle(frame, (120, 400), (520, 430), color=(155, 255, 0), thickness=2)
+        if len(video_frames) == 0:
+            cv2.putText(frame, f"Action Complete Percent: 0", (200, 420),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
 
         # Only start appending video frames if hands are above elbows. If hands are below elbows then we are
         # assuming that no action is being performed.
@@ -198,20 +209,17 @@ with model.mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confi
                     # if not idle, then check to make sure same action is not performed two times in a row
                     # and wait 1 second before making another action prediction (give user time to reset)
                     else:
-                        # Next action cannot be same as previous action
-                        if actions[np.argmax(res)] != detected_actions[-1]:
+                        # append action to detected actioon list
+                        detected_actions.append(actions[np.argmax(res)])
+                        action_time.append(datetime.now())
+                        print(actions[np.argmax(res)])
+                        print(res[np.argmax(res)])
+                        # reset frame list for next action to stop rapid fire predictions
+                        video_frames = []
+                        cv2.putText(frame, f"{actions[np.argmax(res)]}", (120, 200),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 1, (150, 255, 100), 3, cv2.LINE_AA)
 
-                            # append action to detected actioon list
-                            detected_actions.append(actions[np.argmax(res)])
-                            action_time.append(datetime.now())
-                            print(actions[np.argmax(res)])
-                            print(res[np.argmax(res)])
-                            # reset frame list for next action to stop rapid fire predictions
-                            video_frames = []
-                            cv2.putText(frame, f"{actions[np.argmax(res)]}", (120, 200),
-                                        cv2.FONT_HERSHEY_SIMPLEX, 1, (150, 255, 100), 3, cv2.LINE_AA)
-
-                            action_being_performed = actions[np.argmax(res)]
+                        action_being_performed = actions[np.argmax(res)]
 
                         # reset video frame after a prediction has been made
                         video_frames = []
