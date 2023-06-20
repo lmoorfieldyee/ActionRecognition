@@ -9,3 +9,6 @@ ScrapFile.py
 Raw_Data_Testing_Folder/
 Modelling_Data/
 Speech_to_text/
+ffmpeg.exe
+ffplay.exe
+ffprobe.exe
