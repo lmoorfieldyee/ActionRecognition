@@ -16,6 +16,6 @@ Project is divided into 5 parts; data collection, data pre-processing, model tra
 
 In to do this, you must follow the below steps.
 
-1) Collect raw data (or use pre-processed data provided below) by running the "collect_raw_video.py" script. This will do the following: 1) create the file structure to house the newly generated data; 2) collect 30 video samples of the action to be performed; 3) save each video as a series of numpy arrays (each video has 40 frames/numpy arrays). You will need to run this script multiple times to gather all the data you require for your different actions.
+1) Collect raw data (or use pre-processed data provided below) by running the "collect_raw_video.py" script. This will do the following: 1) create the file structure to house new data; 2) collect 30 video samples of the action to be performed; 3) save each video as a series of numpy arrays (each video has 40 frames/numpy arrays). You will need to run this script multiple times to gather all the data you require for your different actions.
 2) 
 
