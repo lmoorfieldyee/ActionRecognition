@@ -25,18 +25,3 @@ for video_num in range(30):
         cv2.waitKey(15)
 
 cv2.destroyAllWindows()
-
-
-"""
-for action in actions:
-    # loop through video files
-    for vid_number in range(0, len(os.listdir(f'./{data_folder}/'+str(action)))):
-        # create path to where we will save action sequences
-        for frame_num in range(0, model.frames_per_seq):
-            path = os.path.join(f'./{data_folder}', action, str(vid_number), str(frame_num)+".npy")
-            frame = np.load(path)
-            cv2.imshow('frame', frame)
-            cv2.waitKey(20)
-cv2.destroyAllWindows()
-
-"""

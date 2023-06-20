@@ -3,6 +3,12 @@ import cv2
 from keypoints import Pipe
 import os
 
+"""
+Be careful with this script as it will overwrite any old processed data you may have. It is not the worst thing
+as it does not overwrite the underlying raw data so you can always re-run the processing, but it can be quite time 
+consuming.
+"""
+
 # instantiate mediapipe model
 model = Pipe()
 
@@ -49,9 +55,5 @@ with model.mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confi
                     # should be "Processed_Data/action_name/video_sample_number/frame_num.npy"
                     output_path = os.path.join(file_path, file + str(frame_num) + ".npy")
 
-                    # save
+                    # save new file
                     np.save(output_path, all_lm)
-
-                    cv2.waitKey(10)
-
-    cv2.destroyAllWindows()

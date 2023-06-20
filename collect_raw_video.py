@@ -7,6 +7,9 @@ import os
 
 def overwrite_check(subject_path, ow):
     """
+    Function to ensure that the video samples you are collecting are not overwritting existing data. If data exists
+    prompts user if they would like to continue. If they don't then exit the program.
+
     :param subject_path: The file path to the current subject's video samples
     :param action: Specifies which action folder to look in to determine if videos already exist
     :param ow: Overwrite parameter - if set to yes, program will overwrite existing videos
@@ -64,7 +67,7 @@ def write_to_frame(frame_number, frames_per_vid, video_number, action, frame):
 
 
 
-def collect_raw_data(subject, description, action):
+def collect_raw_data(subject, description, action, model):
     """
     Takes in a subject and action to be performed. Creates a new directory for them if one does not exist. Records 30
     video samples of the action, with each video consisting of 40 frames, and saves each video's frames in a separate
@@ -80,7 +83,7 @@ def collect_raw_data(subject, description, action):
     ROOT_PATH = './Raw_Data'
 
     # instantiate mediapipe object - only accessing attributes here
-    model = Pipe()
+    model = model
 
     # create directories for new video samples
     # default number of video samples is 30
@@ -132,60 +135,4 @@ if __name__ == "__main__":
     get_subject_name = input('enter subject name. >  ')
     get_location = input("Are you standing or sitting? > ")
     get_action = input('enter action to be recorded. > ')
-    collect_raw_data(get_subject_name, get_location, get_action)
-
-
-
-
-
-##### THIS IS MY OLD CODE. ONLY KEEPING IT HERE FOR REFERENCE. #######
-"""
-path = './Raw_Data'
-person = 'Dev_sitting' + '_Data'
-data_folder = os.path.join(path, person)
-
-actions = ['idle']
-model = Pipe()
-
-# connect web camera
-cap = cv2.VideoCapture(0)
-
-for action in actions:
-    # loop through video files
-    for vid_number in range(0, len(os.listdir(f'./{data_folder}/'+str(action)))):
-        # create path to where we will save action sequences
-        for frame_num in range(0, model.frames_per_seq):
-            path = os.path.join(f'./{data_folder}', action, str(vid_number), str(frame_num))
-
-            # read next frame
-            ret, frame = cap.read()
-
-            # If start of new sequence, then wait for 1 second
-            if frame_num == model.frames_per_seq - 1:
-                cv2.putText(frame, "STARTING COLLECTION", (120, 200),
-                            cv2.FONT_HERSHEY_SIMPLEX, 1, (150, 255, 100), 3, cv2.LINE_AA)
-                cv2.putText(frame, f'Collecting frames for {action} Video Number {vid_number}', (15,12),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, cv2.LINE_AA)
-
-                # display frame to screen
-                cv2.imshow('OpenCV Frame', frame)
-                cv2.waitKey(2000)
-            else:
-                cv2.putText(frame, f'Collecting frames for {action} Video Number {vid_number}', (15, 12),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, cv2.LINE_AA)
-                # display frame to screen
-                cv2.imshow('OpenCV Frame', frame)
-
-                numpy_frame = np.array(frame)
-
-            # save landmarks to appropriate file
-            np.save(path, numpy_frame)
-
-            # break loop gracefully by pressing 'q'
-            k = cv2.waitKey(10)
-            if k == ord('q'):
-                break
-
-cap.release()
-cv2.destroyAllWindows()
-"""
+    collect_raw_data(get_subject_name, get_location, get_action, Pipe())

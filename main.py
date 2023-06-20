@@ -6,6 +6,7 @@ import os
 from datetime import datetime
 from datetime import timedelta
 import socket
+import ScrapFile
 
 """
 NOTE: CHECK WHICH MODEL YOU ARE USING AS EACH MODEL HAS DIFFERENT FEATURES. THIS MEANS THAT YOU WILL NOT ONLY
@@ -31,8 +32,8 @@ BELOW IS A BREAKDOWN OF MODEL MAPPING FOR HANDS_ABOVE_ELBOW()
 def hand_above_elbow(landmark_list, model_number=1):
     """
     Takes in processed frame landmarks and deep learning model. Calculates the distance between wrist landmarks and
-    their respective elbows. If a wrist is above an elbow then returns True as an action could be taking place.
-    Other-wise returns False.
+    their respective elbows. If a wrist is above an elbow then function returns True as an action could be taking place.
+    Otherwise returns False.
 
     :param results: Takes in mediapipe landmark results from processed frame
     :param model_number: Takes either 1 or 2 which specifies which model you are using.
@@ -62,13 +63,29 @@ def hand_above_elbow(landmark_list, model_number=1):
         return False
 
 def load_model(model_number=1):
+    """
+    Takes in the model you would like to use, and loads correct one.
+    :param model_number: Model you would like to use.
+    :return: Loaded model.
+    """
     if model_number==2:
         return keras.models.load_model('./model2/clf_model2-190-0.97.hdf5')
     else:
         return keras.models.load_model('actions.h5')
 
 def send_unity_data(landmark_list, action_being_performed, data_port, model_number=1):
-    if model_number==2:
+    """
+    Function collects and sends all relevant data to Unity via the socket port provided. It sends the x & y position of
+    the user's nose landmark and if an action is being performed.
+    :param landmark_list: List of all landmarks used in the current model.
+    :param action_being_performed: Prediction from the action recognition model. Possible values are all the actions
+    the model has been trained on (salute, wave, heart, finger, idle, kiss) or None if no action is being performed.
+    :param data_port: Is the port to send the data to.
+    :param model_number: Model being used in the program. Different models use different landmarks so
+    we need to specify which model we are using to get the correct results.
+    :return:
+    """
+    if model_number == 2:
         # extract the nose landmark x & y values to update avatar head location
         x_nose_landmark = str(landmark_list[126])
         y_nose_landmark = str(landmark_list[127])
@@ -90,6 +107,14 @@ def send_unity_data(landmark_list, action_being_performed, data_port, model_numb
         sock.sendto(str.encode(unity_data), data_port)
 
 def percent_action_complete(video_len, frames_per_action, frame_to_write):
+    """
+    Creates a bar graph on screen to show how long you need to perform an action before a detection can be made.
+    Action detection algorithm requires 40 frames.
+    :param video_len: How many frames are in the current video sample.
+    :param frames_per_action: How many frames in a video are required for a prediction to be made (default 40)
+    :param frame_to_write: CV2 frame to put the graphics on.
+    :return: Does not return anything.
+    """
     percent_complete = video_len / frames_per_action
     x_dist = 120 + int((520-120)*percent_complete)
     cv2.rectangle(frame_to_write, (120, 400), (x_dist, 430), color=(155,100,50), thickness=-1)
@@ -98,12 +123,25 @@ def percent_action_complete(video_len, frames_per_action, frame_to_write):
 
 
 def reset_video_list(video_frame_list, append_time_list, time_delay):
+    """
+    Function resets the prediction video frame list if it's been longer than 1 second since the last frame has been
+    added to the list. This is done to keep the prediction video list fresh as we only want to pass continuous frames
+    through to the model. We need to use a specified time delay (i.e. 1 second) as we don't want the list to reset
+    immediately as model can lose track of hands or hands can go out of frame momentarily.
+
+    :param video_frame_list: The list of frames which make up the prediction video to be passed to the model.
+    :param append_time_list: The list of times that each frame was added to the video_frame_list.
+    :param time_delay: The amount of time we want to wait before resetting the video_frame_list.
+    :return: Returns video_frame_list and append_time_list unchanged if time passed is less than the given time delta,
+    or fresh empty lists if time passed is greater than the given time delta.
+    """
     # We need to add a time delta as it's quite common for the model to lose track of the hand for a second
 
     # Check to make sure that frame list is being added to, if not just return lists
     if len(append_time_list) == 0:
         return video_frame_list, append_time_list
-    # If actively being added to, if it's been longer than 1 second since last frame reset lists
+    # If actively being added to, check to see if it's been longer than 1 second since last frame has been added. If so,
+    # reset the list.
     else:
         if (datetime.now() - append_time_list[-1]) > time_delay:
             # reset video_frames list to empty
