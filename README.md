@@ -22,6 +22,8 @@ The project is divided into 5 parts; data collection, data pre-processing, explo
 1. Raw Data Collection: To collect your own training video samples, start by running the "collect_raw_video.py" script. This will prompt you to enter the name of the subject performing the action, describe where the subject is performing the action (standing, sitting, etc.), and which action is being performed. The script will then do the following: 
 i. Create the file structure to house new data. An example of the raw data directory structure is below, and please be very careful with your naming conventions as it is easy to overwrite existing data.
 
+<p style="text-align: center;">
+
 - Raw_Data
     - Liam_standing (subject_name + description)
         - Heart (action being performed)
@@ -43,7 +45,7 @@ i. Create the file structure to house new data. An example of the raw data direc
         - ...
         - Wave
     - Etc.
-
+</p>
             
 ii. Proceed to collect 30 video samples of the action to be performed (A video capture will display to display the start and end of each video sample)
 3) save each video as a series of numpy arrays (each video has 40 frames/numpy arrays). You will need to run this script multiple times to gather all the data you require for your different actions.
