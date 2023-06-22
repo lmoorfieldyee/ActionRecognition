@@ -19,12 +19,15 @@ The select actions were chosen due to their distinct and clear motions, and unam
 To showcase the algorithm, the "main.py" script is utilized as a backend to generate and send user location and action data to a Unity program. The data flowing into Unity then controls the location and behaviour of an animated 3D character, which is programmed to respond to each action performed. If you would like to see a demonstration please reach out to me at lmoorfieldyee@gmail.com.
 
 ### Project Methodology:
-The project is divided into 5 parts; data collection, data pre-processing, exploratory data analysis, model training and evaluation, and model deployment. The project is structured in such a way that additional data for both existing actions and new actions can be collected, ingested, stored, and integrated into the model on an ongoing basis. Below is a step-by-step guide on how the project was run. If you want to replicate my results then please download my processed data, which can be found here, and skip to step #3. Alternatively, you can simply fork this repo and run the main.py file to test the model out in real time. Please note that the data collection and pre-processing is done via scripts at the command line, while EDA and model training is done in Jupyter Notebooks. 
+The project is divided into 5 parts; data collection, data pre-processing, exploratory data analysis, model training and evaluation, and model deployment. The project is structured in such a way that additional data for both existing actions and new actions can be collected, ingested, stored, and integrated into the model on an ongoing basis. Below is a step-by-step guide on how the project was run. If you want to replicate my results then please download my processed data, which can be found [here](https://drive.google.com/drive/folders/1tasIyfJDFd82wBcraBnrikJROrPVnEQl?usp=drive_link), and skip to step #3. Alternatively, you can simply fork this repo and run the main.py file to test the model out in real time. 
+
+Please note that the data collection and pre-processing is done via scripts at the command line, while EDA and model training is done in Jupyter Notebooks. 
 
 **Steps**
 
-- Raw_Data
 1. **Raw Data Collection**: To collect training video samples, the "collect_raw_video.py" script is run. This will prompt you to enter the name of the subject performing the action, describe how the subject is performing the action (standing, sitting, etc.), and which action is being performed. The script will then create the directory structure to store the new data, proceed to collect the video samples of the action being performed (a video capture display will appear to track the start and end of each video sample), and save each video sample as a series of numpy arrays. If you want to collect your own data, you should aim to collect as much data for each action as possible, ensuring to vary your location in the frame and how you perform the gesture. The more variation the model sees, the more robust it will be for new unseen data. As a benchmark, the final model in this project was trained on 1260 total videos (210 videos per class) and produced good results. An example of the raw data directory structure after this step is below:
+
+- Raw_Data
      - Liam_standing (subject_name + description)
         - Heart (action being performed)
             - Video_sample_0
@@ -53,10 +56,17 @@ The project is divided into 5 parts; data collection, data pre-processing, explo
    - Left Hand Landmarks = 21 (each with an x, y, z value) = 63 data points
    - Right Hand Landmarks = 21 (each with an x, y, z value) = 63 data points
 
-IMAGE BEFORE PROCESSING
+<center>DATA PROCESSING EXAMPLE</center>
+
+<center>Raw Video Frame</center>
+
 ![Alt text](./report_images/Liam_heart_raw.jpg "Raw Image")
-IMAGE POST PROCESSING
+
+<center>Processed Video Frame</center>
+
 ![Alt text](./report_images/Liam_heart_processed.jpg "Raw Image")
+
+Again, you can access processed data here: https://drive.google.com/drive/folders/1tasIyfJDFd82wBcraBnrikJROrPVnEQl?usp=drive_link
 
 3. **EDA & Data Wrangling:** After the raw data pre-processing, the "Data Wrangling and EDA" notebook is used to re-format the data for exploration. After EDA is complete, the landmark data is broken up into their individual groups (as seen above) and saved for model training (in "Modelling_Data" folder).
 4. **Modelling and Evaluation:** The final stage before deployment is to actually train a model! The "Modelling and Evaluation" notebook trains multiple Long Short-Term Memory (LSTM) Neural Networks on different variations of landmark data. The notebook constantly updates and saves the best weights for each model as training epochs progress. From here, the best models are evaluated and compared, with the best model(s) being deployed.
@@ -81,3 +91,4 @@ Project has the below structure.
   - process_raw_data.py     # script to process raw video
   - view_data.py            # script to view raw data video
   - main.py                 # real time detection script
+
