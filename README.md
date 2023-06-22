@@ -4,9 +4,9 @@
 
 Action recognition is the process of interpreting human motion using computer vision. Use cases for the technology is broad with applications across, but not limited to, security systems, human-computer interactions, human behavior analysis, and entertainment and gaming. 
 
-With the rise of large language models, this project focuses on creating a deep learning model to identify human gestures to further develop human-computer interactions. As a large portion of communication is non-verbal, having a model to identify a person's non-verbal communication is important to develop systems which can fully assess all aspects of an interaction before responding. This will allow for more personalised and precise communication between AI models and humans. This project was inspired by Nicholas Renotte's sign language detection project, https://www.youtube.com/watch?v=doDUihpj6ro&t=5048s&ab_channel=NicholasRenotte, and much of the code used is modified from this video.
+With the rise of large language models, this project focuses on creating a deep learning model to identify human gestures to further develop human-computer interactions. As a large portion of communication is non-verbal, having a model to identify a person's non-verbal communication is important to develop systems which can fully assess all aspects of an interaction before responding. This will allow for more personalised and precise communication between AI models and humans. 
 
-The select actions were chosen due to their distinct and clear motions, and unambiguous meanings. These actions formed a strong baseline model with an overall precision and recall of 97%+ on both the test and train data. The structure laid in this project provides a framework to easily collect more data and continually add more subtle actions to future models. The six actions included in the current algorithm are:
+The select actions were chosen due to their distinct and clear motions, and unambiguous meanings. These actions formed a strong baseline model with an overall precision and recall of 97%+ on both the test and train data. The structure laid out in this project provides a framework to easily collect additional data and continually add more actions to future models. The six actions included in the current algorithm are:
 
 1) Wave
 2) Kiss
@@ -18,7 +18,7 @@ The select actions were chosen due to their distinct and clear motions, and unam
 To showcase the algorithm, the "main.py" script is utilized as a backend to generate and send user location and action data to a Unity program. The data flowing into Unity then controls the location and behaviour of an animated 3D character, which is programmed to respond to each action performed. If you would like to see a demonstration please reach out to me at lmoorfieldyee@gmail.com.
 
 ### Project Methodology:
-The project is divided into 5 parts; data collection, data pre-processing, exploratory data analysis, model training and evaluation, and model deployment. The project is structured in such a way that additional data for both existing actions and new actions can be collected, ingested, stored, and integrated into the model on an ongoing basis. Below is a step-by-step guide on the project was run. If you want to replicate my results then please download my processed data, which can be found here, and skip to step #3. Alternatively, you can simply fork this repo and run the main.py file to test the model out in real life. Please note that the data collection and pre-processing is done via scripts at the command line, while EDA and model training is done in Jupyter Notebooks. 
+The project is divided into 5 parts; data collection, data pre-processing, exploratory data analysis, model training and evaluation, and model deployment. The project is structured in such a way that additional data for both existing actions and new actions can be collected, ingested, stored, and integrated into the model on an ongoing basis. Below is a step-by-step guide on how the project was run. If you want to replicate my results then please download my processed data, which can be found here, and skip to step #3. Alternatively, you can simply fork this repo and run the main.py file to test the model out in real time. Please note that the data collection and pre-processing is done via scripts at the command line, while EDA and model training is done in Jupyter Notebooks. 
 
 **Steps**
 
@@ -45,12 +45,17 @@ The project is divided into 5 parts; data collection, data pre-processing, explo
         - Wave
     - Etc.
 
-2. **Data Processing**: The next step is to process the video data from the "Raw_Data" directory using Google MediaPipe's Holistic model by running the "process_raw_data.py" script. By leveraging Google's Holistic model, it is quick and easy to identify if a human is in the frame and extract various landmarks from their body which track of the position of each body part in the video. It is these landmarks which will be used to train our models. There are 543 landmarks collected for each frame, and each landmark extracted contains a corresponding x, y, & z value, with a visibility value included for the general pose landmarks. Taking into account each x, y, z, & visibility (for pose landmarks only) values for each landmark, there are 1662 data points generated for each frame. The landmark data for each video frame is then flattened, concatenated, and saved as a numpy array in the "Processed_Data" directory. A summary of all the landmarks collected are below:
+2. **Data Processing**: The next step is to process the video data from the "Raw_Data" directory using Google MediaPipe's Holistic model by running the "process_raw_data.py" script. By leveraging Google's Holistic model, it is quick and easy to identify if a human is in the frame and extract various landmarks from their body to track body part positions. It is these landmarks which will be used to train our models. There are 543 landmarks collected for each frame, and each landmark extracted contains a corresponding x, y, & z value, with a visibility value included for the general pose landmarks. Taking into account each x, y, z, & visibility (for pose landmarks only) values for each landmark, there are 1662 data points generated for each frame. The landmark data for each video frame is then flattened, concatenated, and saved as a numpy array in the "Processed_Data" directory. A summary of all the landmarks collected are below:
 
    - Number of Pose landmarks = 33 (each with an x, y, z & visibility value) = 132 data points
    - Number of Face Landmarks = 468 (each with an x, y, z value) = 1404 data points
    - Left Hand Landmarks = 21 (each with an x, y, z value) = 63 data points
    - Right Hand Landmarks = 21 (each with an x, y, z value) = 63 data points
+
+IMAGE BEFORE PROCESSING
+![Alt text](./report_images/Liam_heart_raw.jpg "Raw Image")
+IMAGE POST PROCESSING
+![Alt text](./report_images/Liam_heart_processed.jpg "Raw Image")
 
 3. **EDA & Data Wrangling:** After the raw data pre-processing, the "Data Wrangling and EDA" notebook is used to re-format the data for exploration. After EDA is complete, the landmark data is broken up into their individual groups (as seen above) and saved for model training (in "Modelling_Data" folder).
 4. **Modelling and Evaluation:** The final stage before deployment is to actually train a model! The "Modelling and Evaluation" notebook trains multiple Long Short-Term Memory (LSTM) Neural Networks on different variations of landmark data. The notebook constantly updates and saves the best weights for each model as training epochs progress. From here, the best models are evaluated and compared, with the best model(s) being deployed.
