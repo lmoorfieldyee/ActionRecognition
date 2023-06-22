@@ -1,4 +1,5 @@
 # ActionRecognition
+![Alt text](./report_images/vectorized_wave.png "Raw Image")
 
 ### Research Aim:
 
@@ -59,7 +60,7 @@ IMAGE POST PROCESSING
 
 3. **EDA & Data Wrangling:** After the raw data pre-processing, the "Data Wrangling and EDA" notebook is used to re-format the data for exploration. After EDA is complete, the landmark data is broken up into their individual groups (as seen above) and saved for model training (in "Modelling_Data" folder).
 4. **Modelling and Evaluation:** The final stage before deployment is to actually train a model! The "Modelling and Evaluation" notebook trains multiple Long Short-Term Memory (LSTM) Neural Networks on different variations of landmark data. The notebook constantly updates and saves the best weights for each model as training epochs progress. From here, the best models are evaluated and compared, with the best model(s) being deployed.
-5. **Deployment:** After evaluating models in terms of validation loss, accuracy, precision, and recall, the top model is deployed in the simple "main.py" script. This application collects video data in real time and makes prediction on what action is taking place.
+5. **Deployment:** After evaluating models in terms of validation loss, accuracy, precision, and recall, the top model is deployed in the simple "main.py" script. This application collects video data in real time and makes prediction on what action is taking place. The application will only start to collect videos when your hand(s) come above your elbow(s), as this marks the start of an action. To make a prediction the model requires 40 frames of data, which usually takes longer to collect than it does to actually perform the action, so make sure to perform gestures slowly (especially for the salute and kiss).
 
 ### Project Organization
 Project has the below structure.
